@@ -5,8 +5,6 @@ Item {
     property alias labeltext : labelNombre.text
     property alias inputText : nombre.text
     height: containerlabeText.height
-
-
     Rectangle{
           width: parent.width
           height: 80
