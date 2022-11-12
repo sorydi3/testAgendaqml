@@ -14,7 +14,7 @@ qt_add_executable(appagenda
 qt_add_qml_module(appagenda
     URI agenda
     VERSION 1.0
-    QML_FILES main.qml LabelAndInput.qml
+    QML_FILES main.qml LabelAndInput.qml MyButton.qml
 )
 
 set_target_properties(appagenda PROPERTIES

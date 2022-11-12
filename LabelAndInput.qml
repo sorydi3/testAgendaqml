@@ -8,7 +8,7 @@ Item {
     Rectangle{
           width: parent.width
           height: 80
-          color: "lightgreen"
+          color: "#32cb00"
           anchors.margins: 10
           radius: 10
 
