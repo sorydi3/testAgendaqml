@@ -21,7 +21,9 @@ Item {
                   anchors.left: containerlabeText.left
                   anchors.leftMargin: 10
                    anchors.topMargin: 5
+
                   //width: agenda.width-10
+                   color: "#37474f"
               }
 
             Rectangle{
@@ -45,7 +47,7 @@ Item {
                     //width: parent.width
                     //height: 30
                     id : nombre
-                    text: "Nombre"
+                    text: ""
                     anchors.margins: 5
 
 
