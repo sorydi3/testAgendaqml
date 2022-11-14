@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.LocalStorage 2.0
+import QtQuick.Controls
+
 
 Window {
 
@@ -7,9 +9,6 @@ Window {
     height: 480
     visible: true
     title: qsTr("Agendav.0")
-
-
-
 
     Rectangle {
         id:ventana
@@ -21,11 +20,22 @@ Window {
 
         property var db;
 
+        property int currentMonth:0
+
+        property int  currentYear: 0
+
+        property var months: ["January","February","March","April","May","June","July",
+            "August","September","October","November","December"];
+
+
+
 
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#b0ff57" }
             GradientStop { position: 1.0; color: "#32cb00" }
         }
+
+
 
         Rectangle {
              id: ball
@@ -89,6 +99,8 @@ Window {
                      }else{
                          ventana.serchElement()
                      }
+
+                     idDialogo.open()
 
             }
          }
@@ -238,9 +250,36 @@ Window {
          });
     }
 
+   function populateModel(){
+        var fechaLocal = new Date(currentYear,currentMonth,1);
+        var modelLocal=[]
+       fechaLocal.setDate(1);
+
+       if(fechaLocal.getDay()>1){
+
+            fechaLocal.setTime(fechaLocal.getTime()-24+3600*1000*(fechaLocal.getDay()-1));
+       }else if(fechaLocal.getDay()<1){
+
+        fechaLocal.setTime(fechaLocal.getTime()-24*3600*1000*6);
+       }
+
+    for(var i = 0;i< 42;i++){
+        modelLocal.push(fechaLocal.getDate());
+        fechaLocal.setTime(fechaLocal.getTime()+24*3600000);
+    }
+
+    calendario.model = modelLocal
+   }
+
    Component.onCompleted: {
        createDataBase()
         anim.restart();
+
+       var fecha = new Date()
+
+       currentMonth = fecha.getMonth()
+       currentYear = 2022
+       ventana.populateModel();
    }
    ParallelAnimation{
 
@@ -340,6 +379,241 @@ Window {
 
    ]
 
-    }
+
+
+
+   Dialog{
+
+       id:idDialogo
+
+       Rectangle{
+
+           id: idContainerButtons
+
+           anchors.top: ventana.top
+           anchors.right: ventana.right
+
+           width: ventana.width/3
+           height: ventana.height/14
+           z:1
+           radius: 10
+
+           color: "yellow"
+
+           anchors.margins: 10
+
+
+           Rectangle{
+
+               id:leftButton
+               anchors.top: parent.top
+               anchors.left: parent.left
+               anchors.leftMargin: 10
+               anchors.topMargin: 10
+               color: "#b0ff57"
+
+               width: idContainerButtons.width/4
+               height: idContainerButtons.height/2
+
+               radius: 10
+
+
+               Text{
+                   anchors.centerIn: parent
+                   text: "<"
+                   font.bold: true
+                   font.pointSize: 12
+                   //color: "red"
+
+               }
+
+               MouseArea{
+
+                   anchors.fill: parent
+
+                   onClicked: {
+
+                       if(ventana.currentMonth>=0){
+
+                        ventana.currentMonth--
+                       }else{
+
+                           ventana.currentMonth=11
+                           ventana.currentYear--;
+
+                       }
+
+                       ventana.populateModel();
+
+                   }
+               }
+
+           }
+
+
+
+          Column{
+
+              anchors.centerIn: parent
+              Text {
+                  id: month
+                  text: ventana.months[ventana.currentMonth]
+              }
+
+              Text {
+                  id: date
+                  text: ventana.currentYear
+              }
+
+          }
+
+
+           Rectangle{
+               anchors.right: parent.right
+               anchors.top: parent.top
+               anchors.margins: 10
+               color: "#b0ff57"
+               width: idContainerButtons.width/4
+               height: idContainerButtons.height/2
+
+               radius: 10
+
+
+               id:idRightButton
+               Text{
+                   anchors.centerIn: parent
+                   text: ">"
+                   font.bold: true
+                   font.pointSize: 12
+               }
+
+
+               MouseArea{
+
+                   anchors.fill: parent
+
+                   onClicked: {
+
+                       if(ventana.currentMonth<11){
+
+                        ventana.currentMonth++
+                       }else{
+
+                           ventana.currentMonth=0
+                           ventana.currentYear++;
+
+                       }
+
+                       ventana.populateModel();
+                   }
+               }
+
+           }
+
+
+
+       }
+
+       Rectangle{
+
+           id:rectanguloCalendario
+
+           anchors.top: idContainerButtons.bottom
+           anchors.right: ventana.right
+           radius: 5
+
+           anchors.topMargin: 10
+           anchors.rightMargin: 10
+
+            z:1
+
+            height: ventana.height/4
+            width: ventana.width/3
+
+            //color: ""
+
+
+
+           GridView{
+
+               anchors.fill: parent
+
+               id:calendario
+
+
+                //model: 42
+
+                cellWidth : calendario.width/7
+                cellHeight: calendario.height/6
+
+
+
+
+
+                delegate: Rectangle{
+
+                    id:rectangleDelegate
+                    color: "green"
+                    width: calendario.cellWidth
+                    height: calendario.cellHeight
+
+                    radius: 5
+                    //border.color: "black"
+
+                    required property var modelData
+
+                    Rectangle{
+
+                        id: irectangle
+
+
+                        anchors.margins: calendario.cellWidth
+
+
+
+                        anchors.fill: parent
+
+
+                        Text {
+                            id: delegate
+                            color: "white"
+                            text: rectangleDelegate.modelData
+                            anchors.centerIn: parent
+                            font.bold:true
+                        }
+
+
+                        MouseArea{
+
+                                id: idMouseAreadelegate
+
+
+                                anchors.fill: parent
+
+
+                                onClicked: {
+
+
+
+
+                                }
+
+                        }
+
+
+                    }
+
+                }
+           }
+
+
+
+      }
+
+
+   }
+
+
+   }
 }
 
