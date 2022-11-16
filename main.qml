@@ -218,12 +218,64 @@ Window {
    function createTableCoordinates () {
 
        db.transaction((tx) =>{
-           var sentencia = 'CREATE TABLE IF NOT EXISTS coordinates(nombre TEXT)';
+           var sentencia = 'CREATE TABLE IF NOT EXISTS coordinates(name TEXT,value TEXT)';
            tx.executeSql(sentencia);
                           console.log("creating table coordinates");
        });
 
    }
+
+
+
+   function guardarPosition() {
+
+           if(!dB) return
+
+           dB.transaction ((tx) => {
+
+                               var sentencia = "SELECT name FROM data WHERE name = 'posRect'";
+                               var resultadao = tx.executeSql(sentencia);
+                               var objecto = {
+                               x : cuadrado.x,
+                                   y:cuadrado.y
+                               };
+
+                               if(resultadao.rows.length===1){
+                                   console.log("tenemos un row por lo menos");
+                                   resultadao = tx.executeSql("UPDATE data set value=? WHERE  name = 'posRect'",[JSON.stringify(objecto)]);
+                               }else{
+                                   console.log("todavia no hay datos en la taula");
+                                   resultadao = tx.executeSql("INSERT INTO data VALUES (?,?)",["posRect",JSON.stringify(objecto)])
+                               }
+
+        });
+
+   }
+
+   function leerPosition (){
+
+       if (!dB) return
+
+       dB.transaction((tx) => {
+                      var sentencia = "SELECT * FROM data WHERE name='posRect'";
+         var resultado = tx.executeSql(sentencia);
+                          if(resultado.rows.length ===1){
+
+                          var valor = resultado.rows[0].value;
+
+                              var objeto = JSON.parse(valor);
+                              cuadrado.x = objeto.x;
+                              cuadrado.y = objeto.y;
+                          }
+
+
+       });
+
+
+ }
+
+
+
 
 
    function createDataBase() {
