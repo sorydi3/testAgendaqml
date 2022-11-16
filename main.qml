@@ -97,10 +97,10 @@ Window {
                          console.log("no hay nombre");
                          ventana.state = "Guardar"
                      }else{
-                         ventana.serchElement()
+                         ventana.serchElement(nombre.inputText);
                      }
 
-                     idDialogo.open()
+                     //idDialogo.open()
 
             }
          }
@@ -123,6 +123,23 @@ Window {
              onClicked: {
 
                  ventana.state = "Search"
+
+                 function insertEvent (){
+
+                     var sentencia = "INSERT INTO eventtable VALUES(?,?,?);";
+
+                     console.log(sentencia);
+
+                     console.log("nombre--->" + nombre.inputText)
+                         var idResult
+                     ventana.db.transaction( function (tx) {
+                        idResult = tx.executeSql(sentencia,[nombre.inputText,contacto.inputText,address.inputText])
+                       });
+
+                     console.log("ID OF THE ISERTED ROW =>" + idResult);
+                }
+
+                 insertEvent();
 
              }
            }
@@ -175,6 +192,12 @@ Window {
                LabelAndInput{
                    id : contacto
                    labeltext: "Dirección"
+
+                   clickeable: false
+
+
+
+
                }
 
                LabelAndInput{
@@ -183,14 +206,36 @@ Window {
 
                }
 
+
+               LabelAndInput{
+                  id: foto
+                  labeltext: "ArchivoFoto"
+               }
+
            }
 
 
-        function createDataBase() {
+   function createTableCoordinates () {
+
+       db.transaction((tx) =>{
+           var sentencia = 'CREATE TABLE IF NOT EXISTS coordinates(nombre TEXT)';
+           tx.executeSql(sentencia);
+                          console.log("creating table coordinates");
+       });
+
+   }
+
+
+   function createDataBase() {
        //create the database
        db = LocalStorage.openDatabaseSync("evendatabase","1.0","this database store data related to events",2000)
 
        // create the database where the data will be stored
+       db.transaction((tx) =>{
+                          var sentencia = 'DROP TABLE IF EXISTS';
+                          tx.executeSql(sentencia)
+                      });
+
        db.transaction((tx) =>{
            var sentencia = 'CREATE TABLE IF NOT EXISTS eventtable(nombre TEXT,address TEXT,number TEXT)';
            tx.executeSql(sentencia);
@@ -199,41 +244,38 @@ Window {
    }
 
 
-   function insertEvent (){
-
-       var sentencia = "INSERT INTO even VALUES(?,?,?)";
-
-       var object;
-       object.name = nombre.inputText
-       object.contact = contacto.inputText
-       object.address = address.inputText
-
-         db.transaction((tx) => {
-              tx.executeSql(sentencia,[nombre.text,contacto.text,address.text]);
-         });
-  }
-
-
    function deleteEvent(){
        var sentecia = "DELETE FROM eventtable WHERE nombre = ?"
        db.transaction((tx)=>{tx.executeSql(sentencia,[nombre.text])})
 
    }
 
-   function serchElement() {
-      var sentencia = "SELECT * FROM eventtable WHERE nombre = ?";
+   function serchElement(nombree) {
+      var sentencia = "SELECT * FROM eventtable WHERE nombre = '"+nombree+"';";
+       console.log(sentencia);
 
-       var object={};
-       object.nombre='ibrahima';
-      var result = db.transaction((tx)=>{tx.executeSql(sentencia,JSON.stringify([object]))})
+       if(!db){
 
-        console.log(result);
+           console.log("DATABASE DOES NOT EXIST!");
+
+           return;
+       }
+
+        var result;
+       db.transaction((tx)=>{ result = tx.executeSql(sentencia)})
+
+        console.log( "result ==>"+ result.rows.length);
+       if(!result){
+        ventana.state = "Guardar"
+           return
+       }
         if(result.rows.length > 0){
             var row = result.rows.item(0);
             nombre.inputText = row.nombre;
+
         }else{
             address.visible =  true
-            address.visible =  true
+            ventana.state = "Guardar"
             console.log("no se encontro el elemento");
         }
 
@@ -273,7 +315,8 @@ Window {
 
    Component.onCompleted: {
        createDataBase()
-        anim.restart();
+        //anim.restart();
+       timer.restart()
 
        var fecha = new Date()
 
@@ -281,6 +324,23 @@ Window {
        currentYear = 2022
        ventana.populateModel();
    }
+
+
+
+   Timer{
+
+        id:timer
+
+        interval:ventana.duration
+
+        repeat:true
+
+        running:true
+
+        onTriggered : anim.restart();
+
+   }
+
    ParallelAnimation{
 
             id:anim
@@ -308,12 +368,6 @@ Window {
                     easing.type: Easing.OutBounce
 
                 }
-
-
-
-
-
-
             }
 
             RotationAnimation {
@@ -331,8 +385,7 @@ Window {
                 to:ventana.width-ball.width
             }
 
-
-        }
+   }
 
    state: "Search"
 
@@ -343,6 +396,7 @@ Window {
            PropertyChanges { target: address;visible : false}
            PropertyChanges { target: contacto; visible : false}
            PropertyChanges { target: idGuardar; visible : false}
+           PropertyChanges { target: foto; visible : false}
        },
 
        State {
@@ -350,6 +404,7 @@ Window {
            PropertyChanges { target: address;visible : true}
            PropertyChanges { target: contacto; visible : true}
            PropertyChanges { target: idGuardar; visible : true}
+           PropertyChanges { target: foto; visible : true}
        }
    ]
 
@@ -378,8 +433,6 @@ Window {
        }
 
    ]
-
-
 
 
    Dialog{
@@ -593,8 +646,8 @@ Window {
 
                                 onClicked: {
 
-
-
+                                    //if()
+                                        
 
                                 }
 
@@ -609,10 +662,7 @@ Window {
 
 
       }
-
-
-   }
-
+}
 
    }
 }

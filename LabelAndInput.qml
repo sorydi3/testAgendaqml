@@ -2,16 +2,21 @@ import QtQuick
 
 Item {
     width: parent.width
+    height: containerlabeText.height
+    id:mainid
     property alias labeltext : labelNombre.text
     property alias inputText : nombre.text
-    height: containerlabeText.height
+    property bool clickeable: true
+    signal campoSeleccionado();
     Rectangle{
+
+
+
           width: parent.width
           height: 80
           color: "#32cb00"
           anchors.margins: 10
           radius: 10
-
           id:containerlabeText
 
               Text {
@@ -47,8 +52,32 @@ Item {
                     //width: parent.width
                     //height: 30
                     id : nombre
+
                     text: ""
                     anchors.margins: 5
+
+                    MouseArea{
+                        id:mouserear
+
+                        anchors.fill: parent
+
+
+
+                        hoverEnabled: true
+
+
+                        cursorShape: Qt.IBeamCursor
+
+
+                        onClicked: {
+                            nombre.focus=mainid.clickeable;
+                            //containerlabeText.campoSeleccionado();
+                        }
+
+
+
+                    }
+
 
 
                 }
