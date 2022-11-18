@@ -9,6 +9,7 @@ find_package(Qt6 6.2 COMPONENTS Quick REQUIRED)
 
 qt_add_executable(appagenda
     main.cpp
+    serialcommunicator.h serialcommunicator.cpp
 )
 
 qt_add_qml_module(appagenda
