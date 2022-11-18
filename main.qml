@@ -15,6 +15,7 @@ Window {
         anchors.fill: parent
         color: "#b0ff57"
 
+        focus: true
 
         property int duration: 5000
 
@@ -27,8 +28,12 @@ Window {
         property var months: ["January","February","March","April","May","June","July",
             "August","September","October","November","December"];
 
+        property string addressi: 'addressi'
+        property string numeroi:  'numeroi'
+        property string nombrei: 'nombrei'
+        property string fotoi: 'fotoi'
 
-
+        signal nnputSignal()
 
         gradient: Gradient {
             GradientStop { position: 0.0; color: "#b0ff57" }
@@ -79,13 +84,18 @@ Window {
 
             id : sButton
             titleButton : "Buscar"
-
+            /*
 
             anchors{
              right:agenda.right
              bottom: agenda.top
              bottomMargin: 10
             }
+            */
+
+            //activeFocus: true
+
+
 
             MouseArea {
                 anchors.fill: parent
@@ -100,9 +110,19 @@ Window {
                          ventana.serchElement(nombre.inputText);
                      }
 
+
+
+                     drag.target =  ventana
+
+
+
                      //idDialogo.open()
 
             }
+
+                drag.target: sButton
+
+
          }
 
         }
@@ -111,16 +131,21 @@ Window {
            id:idGuardar
            width: 250
            titleButton: "Guardar"
+
+           /*
            anchors{
                top: agenda.bottom
                left: agenda.left
                topMargin: 10
            }
-
+           */
+           //activeFocus: true
            MouseArea{
              anchors.fill: parent
 
              onClicked: {
+
+
 
                  ventana.state = "Search"
 
@@ -142,7 +167,12 @@ Window {
                  insertEvent();
 
              }
+
+             drag.target: idGuardar
            }
+
+
+
 
         }
 
@@ -160,50 +190,62 @@ Window {
                     margins: 20
                }
            }
-
+/*
         Column {
 
                id:agenda
                y:60
-               width: parent.width-30
+               width: parent.width-100
 
+*/
+               //anchors.margins: 5
 
-               anchors.margins: 5
+              // spacing: 15
 
-               spacing: 15
-
-               anchors.centerIn: parent
+              // anchors.centerIn: parent
 
 
                LabelAndInput{
+
                    id : nombre
+                   labeltext: "Nombre"
 
                    z:1
+
+                   //maxDragXx : ventana.width - nombre.width
+
+                  // maxDragYy: ventana.height - nombre.height
+
+
                }
 
+
+/*
                Rectangle{
                    color: "#b0ff57"
                    height: 30
                    width: parent.width
                    radius: 50
 
-               }
+                   MouseArea {
+
+                     anchors.fill: parent
+
+                     drag.target: agenda
+                   }
+
+               }*/
 
                LabelAndInput{
                    id : contacto
-                   labeltext: "Dirección"
+                   labeltext: "Numero"
 
                    clickeable: false
-
-
-
-
                }
 
                LabelAndInput{
                   id: address
-                  labeltext: "Numero"
-
+                  labeltext: "Address"
                }
 
 
@@ -211,9 +253,9 @@ Window {
                   id: foto
                   labeltext: "ArchivoFoto"
                }
-
-           }
-
+/*
+           }*/
+///
 
    function createTableCoordinates () {
 
@@ -227,45 +269,140 @@ Window {
 
 
 
-   function guardarPosition() {
+   function guardarPosition(button) {
 
-           if(!dB) return
+           if(!db) return
 
-           dB.transaction ((tx) => {
+           db.transaction ((tx) => {
 
-                               var sentencia = "SELECT name FROM data WHERE name = 'posRect'";
+                               var sentencia = "SELECT name FROM coordinates WHERE name = '"+button+"'";
+                                console.log(sentencia);
                                var resultadao = tx.executeSql(sentencia);
-                               var objecto = {
-                               x : cuadrado.x,
-                                   y:cuadrado.y
-                               };
+                               var objecto;
+
+                               switch(button) {
+                                 case 'buttonb': {
+                                       objecto = {
+                                       x : sButton.x,
+                                           y:sButton.y
+                                       };
+                                       break;
+                                   }
+                                 case 'buttong':{
+                                       objecto = {
+                                       x : idGuardar.x,
+                                           y:idGuardar.y
+                                       };
+                                       break;
+                                   }
+                                 case ventana.nombrei :{
+                                       objecto = {
+                                       x : nombre.x_,
+                                           y:nombre.y_
+                                       };
+
+                                       break;
+                                   }
+                                 case ventana.addressi :{
+
+                                       objecto = {
+                                       x : address.x_,
+                                           y:address.y_
+                                       };
+                                       console.log("POS SAVED FOR FIELDS ADDRESS ======>"+JSON.stringify(objecto))
+                                       break;
+                                   }
+                                 case ventana.fotoi :{
+
+                                       objecto = {
+                                       x : foto.x_,
+                                           y:foto.y_
+                                       };
+
+                                       break;
+                                   }
+                                 case ventana.numeroi :{
+                                       objecto = {
+                                       x : contacto.x_,
+                                           y:contacto.y_
+                                       };
+
+                                       break;
+                                   }
+                                 default:{
+                                     console.log("not found>>>>>>>>>>" + button)
+                                   }
+                                   // code block
+                               }
 
                                if(resultadao.rows.length===1){
-                                   console.log("tenemos un row por lo menos");
-                                   resultadao = tx.executeSql("UPDATE data set value=? WHERE  name = 'posRect'",[JSON.stringify(objecto)]);
+
+                                   console.log("updating..."+button+ " "+JSON.stringify(objecto));
+                                   resultadao = tx.executeSql("UPDATE coordinates set value=? WHERE  name = '"+button+"'",[JSON.stringify(objecto)]);
                                }else{
-                                   console.log("todavia no hay datos en la taula");
-                                   resultadao = tx.executeSql("INSERT INTO data VALUES (?,?)",["posRect",JSON.stringify(objecto)])
+
+                                   console.log("creating..." + JSON.stringify(objecto));
+                                   resultadao = tx.executeSql("INSERT INTO coordinates VALUES (?,?)",[button,JSON.stringify(objecto)])
                                }
 
         });
-
    }
 
-   function leerPosition (){
+   function leerPosition (button){
+       console.log("reading positions " + button)
 
-       if (!dB) return
+       if (!db) return
 
-       dB.transaction((tx) => {
-                      var sentencia = "SELECT * FROM data WHERE name='posRect'";
+       db.transaction((tx) => {
+                      var sentencia = "SELECT * FROM coordinates WHERE name='"+button+"'";
+                          console.log(sentencia);
          var resultado = tx.executeSql(sentencia);
                           if(resultado.rows.length ===1){
-
-                          var valor = resultado.rows[0].value;
+                              console.log("found row")
+                              var valor = resultado.rows[0].value;
 
                               var objeto = JSON.parse(valor);
-                              cuadrado.x = objeto.x;
-                              cuadrado.y = objeto.y;
+                              switch(button) {
+                                case 'buttonb': {
+                                      sButton.x = objeto.x;
+                                      sButton.y = objeto.y;
+                                      break;
+                                  }
+                                case 'buttong':{
+
+                                      idGuardar.x = objeto.x;
+                                      idGuardar.y = objeto.y;
+
+                                      break;
+                                  }
+                                case ventana.nombrei :{
+
+                                      nombre.x_ = objeto.x;
+                                      nombre.y_ = objeto.y;
+                                      break;
+                                  }
+                                case ventana.addressi :{
+                                       console.log("POS READ FOR FIELDS ADDRESS ======>"+JSON.stringify(objeto))
+                                      address.x_ = objeto.x;
+                                      address.y_ = objeto.y;
+                                      break;
+                                  }
+                                case ventana.fotoi :{
+                                      foto.x_ = objeto.x;
+                                      foto.y_ = objeto.y;
+                                      break;
+                                  }
+                                case ventana.numeroi :{
+                                      contacto.x_ = objeto.x;
+                                      contacto.y_ = objeto.y;
+                                      break;
+                                  }
+                                default:
+                                  // code block
+                              }
+                          }else{
+
+                            console.log("not found row");
                           }
 
 
@@ -283,10 +420,6 @@ Window {
        db = LocalStorage.openDatabaseSync("evendatabase","1.0","this database store data related to events",2000)
 
        // create the database where the data will be stored
-       db.transaction((tx) =>{
-                          var sentencia = 'DROP TABLE IF EXISTS';
-                          tx.executeSql(sentencia)
-                      });
 
        db.transaction((tx) =>{
            var sentencia = 'CREATE TABLE IF NOT EXISTS eventtable(nombre TEXT,address TEXT,number TEXT)';
@@ -367,6 +500,7 @@ Window {
 
    Component.onCompleted: {
        createDataBase()
+       createTableCoordinates()
         //anim.restart();
        timer.restart()
 
@@ -375,7 +509,26 @@ Window {
        currentMonth = fecha.getMonth()
        currentYear = 2022
        ventana.populateModel();
+
+        ventana.leerPosition('buttong')
+        ventana.leerPosition('buttonb')
+
+       ventana.leerPosition(ventana.nombrei);
+       ventana.leerPosition(ventana.addressi);
+       ventana.leerPosition(ventana.numeroi);
+       ventana.leerPosition(ventana.fotoi);
    }
+
+
+  Component.onDestruction : {
+      ventana.guardarPosition('buttong');
+      ventana.guardarPosition('buttonb');
+
+      ventana.guardarPosition(ventana.nombrei);
+      ventana.guardarPosition(ventana.addressi);
+      ventana.guardarPosition(ventana.numeroi);
+      ventana.guardarPosition(ventana.fotoi);
+  }
 
 
 
@@ -710,8 +863,6 @@ Window {
 
                 }
            }
-
-
 
       }
 }
