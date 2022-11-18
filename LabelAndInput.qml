@@ -29,6 +29,7 @@ Item {
           anchors.margins: 10
           radius: 10
           id:containerlabeText
+          opacity: (containerlabeText.width*3 - containerlabeText.x) / containerlabeText.width*3
 
               Text {
                   id: labelNombre
@@ -54,6 +55,8 @@ Item {
                     centerIn: parent
                 }
                //border.color: "black"
+
+
 
                 radius: 5
 
